@@ -107,6 +107,15 @@ abstract class AbstractThriftMojo extends AbstractMojo {
     private String thriftVersion;
 
     /**
+     * Set this to {@code true} to enable recursive compilation of dependencies. 
+     * See {@code -r} option of the {@code thrift} parameter for more info.
+     *
+     * @parameter default-value="false"
+     * @required
+     */
+    private boolean recursive;
+
+    /**
      * This string is passed to the {@code --gen} option of the {@code thrift} parameter. By default
      * it will generate Java output. The main reason for this option is to be able to add options
      * to the Java generator - if you generate something else, you're on your own.
@@ -240,6 +249,7 @@ abstract class AbstractThriftMojo extends AbstractMojo {
                     
                     Thrift thrift = new Thrift.Builder(artifact.getFile().getAbsolutePath(), outputDirectory)
                             .setGenerator(generator)
+                            .setRecursive(recursive)
                             .addThriftPathElement(thriftSourceRoot)
                             .addThriftPathElements(derivedThriftPathElements)
                             .addThriftPathElements(asList(additionalThriftPathElements))

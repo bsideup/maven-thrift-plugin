@@ -49,6 +49,7 @@ final class Thrift {
     final static String GENERATED_JAVA = "gen-java";
 
     private final String executable;
+    private final boolean recursive;
     private final String generator;
     private final ImmutableSet<File> thriftPathElements;
     private final ImmutableSet<File> thriftFiles;
@@ -66,9 +67,10 @@ final class Thrift {
      * @param javaOutputDirectory The directory into which the java source files
      *                            will be generated.
      */
-    private Thrift(String executable, String generator, ImmutableSet<File> thriftPath,
+    private Thrift(String executable, boolean recursive, String generator, ImmutableSet<File> thriftPath,
                    ImmutableSet<File> thriftFiles, File javaOutputDirectory) {
         this.executable = checkNotNull(executable, "executable");
+        this.recursive = recursive;
         this.generator = checkNotNull(generator, "generator");
         this.thriftPathElements = checkNotNull(thriftPath, "thriftPath");
         this.thriftFiles = checkNotNull(thriftFiles, "thriftFiles");
@@ -116,6 +118,9 @@ final class Thrift {
             command.add("-I");
             command.add(thriftPathElement.toString());
         }
+        if(recursive) {
+            command.add("-r");
+        }
         command.add("-out");
         command.add(javaOutputDirectory.toString());
         command.add("--gen");
@@ -149,6 +154,7 @@ final class Thrift {
         private Set<File> thriftPathElements;
         private Set<File> thriftFiles;
         private String generator;
+        private boolean recursive;
 
         /**
          * Constructs a new builder. The two parameters are present as they are
@@ -167,6 +173,11 @@ final class Thrift {
             checkArgument(javaOutputDirectory.isDirectory());
             this.thriftFiles = newHashSet();
             this.thriftPathElements = newHashSet();
+        }
+        
+        public Builder setRecursive(boolean recursive) {
+            this.recursive = recursive;
+            return this;
         }
 
         /**
@@ -261,7 +272,7 @@ final class Thrift {
          */
         public Thrift build() {
             checkState(!thriftFiles.isEmpty());
-            return new Thrift(executable, generator, ImmutableSet.copyOf(thriftPathElements),
+            return new Thrift(executable, recursive, generator, ImmutableSet.copyOf(thriftPathElements),
                     ImmutableSet.copyOf(thriftFiles), javaOutputDirectory);
         }
     }
